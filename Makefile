@@ -1,4 +1,4 @@
-NAME=registrator
+NAME=vidarl_registrator
 VERSION=$(shell cat VERSION)
 DEV_RUN_OPTS ?= consul:
 

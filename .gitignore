@@ -1,3 +1,4 @@
 release
 build
 registrator
+dist/*.tar.gz
