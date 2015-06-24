@@ -10,7 +10,6 @@ dev:
 	$(NAME):dev /bin/registrator -ip 127.0.0.1 etcd-tmpl://127.0.0.1:4001/services
 
 build:
-	mkdir -p dist
 	docker build -f Dockerfile.dev -t $(NAME):$(VERSION) .
 	docker save $(NAME):$(VERSION) | gzip -9 > dist/$(NAME)_$(VERSION).tar.gz
 
