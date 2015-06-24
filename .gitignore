@@ -2,3 +2,6 @@ release
 build
 registrator
 dist/*.tar.gz
+dist/common-registrator.yml
+dist/docker-compose.yml
+
