@@ -11,6 +11,8 @@ dev:
 
 build:
 	docker build -f Dockerfile.dev -t $(NAME):$(VERSION) .
+
+ezrelease: build
 	docker save $(NAME):$(VERSION) | gzip -9 > dist/$(NAME)_$(VERSION).tar.gz
 
 release:
@@ -26,4 +28,4 @@ ifneq ($(CIRCLE_BRANCH), release)
 	echo build-$$CIRCLE_BUILD_NUM > VERSION
 endif
 
-.PHONY: build release
+.PHONY: build ezrelease release
