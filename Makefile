@@ -8,10 +8,27 @@ dev:
 		-v /var/run/docker.sock:/tmp/docker.sock \
 		$(NAME):dev /bin/registrator $(DEV_RUN_OPTS)
 
+# When using the ezdev target, you likely wanna use the dev target first to make the image. Then use ezdev which will mount the registrator source on host inside the container using volume
+# Once you have done code changes, you may restart the container using:
+# $docker rm -vf registrator; make ezdev; docker logs --follow registrator
+ezdev:
+	docker run --name=registrator -d -v /var/run/docker.sock:/tmp/docker.sock \
+		-h vl \
+		-v `pwd`:/go/src/github.com/gliderlabs/registrator \
+		--network cdm_default \
+		-e ETCD_TMPL_HOSTNAMES="{{if and .Attrs.lbregister .Attrs.hostnames}}/sites/{{.ID}}/hostnames {{.Attrs.hostnames}}{{end}}" \
+		-e ETCD_TMPL_IP="{{if .Attrs.lbregister}}/sites/{{.ID}}/ip {{.IP}}{{end}}" \
+		-e ETCD_TMPL_PORT="{{if .Attrs.lbregister}}/sites/{{.ID}}/port {{.Port}}{{end}}" \
+		-e GOPATH="/go" \
+		$(NAME):dev /bin/sh -c "cd /go/src/github.com/gliderlabs/registrator; go build -ldflags '-X main.Version=dev' -o /bin/registrator; exec /bin/registrator -ip 127.0.0.1 etcd://etcd:2379/sites"
+
 build:
 	mkdir -p build
 	docker build -t $(NAME):$(VERSION) .
 	docker save $(NAME):$(VERSION) | gzip -9 > build/$(NAME)_$(VERSION).tgz
+
+ezrelease: build
+	docker save $(NAME):$(VERSION) | gzip -9 > dist/$(NAME)_$(VERSION).tar.gz
 
 release:
 	rm -rf release && mkdir release
@@ -30,4 +47,4 @@ circleci:
 	go get -u github.com/gliderlabs/glu
 	glu circleci
 
-.PHONY: build release docs
+.PHONY: build ezrelease release docs
