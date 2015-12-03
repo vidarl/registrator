@@ -9,3 +9,5 @@ RUN apk-install -t build-deps build-base go git mercurial \
 	&& go build -ldflags "-X main.Version=$(cat VERSION)" -o /bin/registrator \
 	&& rm -rf /go \
 	&& apk del --purge build-deps
+
+ADD run.sh /run.sh
