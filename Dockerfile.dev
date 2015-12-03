@@ -7,3 +7,5 @@ COPY . /go/src/github.com/gliderlabs/registrator
 RUN cd /go/src/github.com/gliderlabs/registrator \
 	&& go get \
 	&& go build -ldflags "-X main.Version dev" -o /bin/registrator
+
+ADD run.sh /run.sh
