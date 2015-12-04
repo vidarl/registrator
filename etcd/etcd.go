@@ -16,6 +16,7 @@ import (
 	etcd2 "github.com/coreos/go-etcd/etcd"
 	"github.com/gliderlabs/registrator/bridge"
 	etcd "gopkg.in/coreos/go-etcd.v0/etcd"
+	"path"
 )
 
 const templatePrefix = "ETCD_TMPL"
@@ -156,6 +157,8 @@ func (r *EtcdAdapter) Deregister(service *bridge.Service) error {
 		} else {
 			_, err = r.client2.Delete(path, false)
 		}
+
+		r.garbageCollection(r.path, path)
 	} else {
 		toSet, err := r.executeTemplates(service)
 		if err == nil {
@@ -176,6 +179,7 @@ func (r *EtcdAdapter) Deregister(service *bridge.Service) error {
 	if err != nil {
 		log.Println("etcd: failed to deregister service:", err)
 	}
+
 	return err
 }
 
@@ -212,4 +216,22 @@ func (r *EtcdAdapter) executeTemplates(service *bridge.Service) (map[string]stri
 	}
 
 	return results, nil
+}
+
+func (r *EtcdAdapter) garbageCollection(rootDir string, dirPath string) {
+	for rootDir != dirPath {
+		var err error
+		if r.client != nil {
+			_, err = r.client.DeleteDir(dirPath)
+		} else {
+			_, err = r.client2.DeleteDir(dirPath)
+		}
+
+		if err != nil {
+			return
+		}
+
+		dirPath, _ := path.Split(dirPath)
+		dirPath = path.Clean(dirPath)
+	}
 }
