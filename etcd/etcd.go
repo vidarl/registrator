@@ -157,7 +157,7 @@ func (r *EtcdAdapter) Deregister(service *bridge.Service) error {
 	} else {
 		toSet, err := r.executeTemplates(service)
 		if err == nil {
-			for key, value := range toSet {
+			for key := range toSet {
 				if r.client != nil {
 					_, err = r.client.Delete(key, false)
 				} else {
