@@ -31,7 +31,7 @@ func (f *Factory) New(uri *url.URL) bridge.RegistryAdapter {
 	if uri.Host != "" {
 		urls = append(urls, "http://"+uri.Host)
 	} else {
-		urls = append(urls, "http://127.0.0.1:4001")
+		urls = append(urls, "http://127.0.0.1:2379")
 	}
 
 	// Find all environment variables that start with ETCD_TMPL and turn them into templates. If there are no
@@ -71,6 +71,8 @@ type EtcdAdapter struct {
 }
 
 func (r *EtcdAdapter) Ping() error {
+	r.syncEtcdCluster()
+
 	var err error
 	if r.client != nil {
 		rr := etcd.NewRawRequest("GET", "version", nil, nil)
@@ -86,7 +88,23 @@ func (r *EtcdAdapter) Ping() error {
 	return nil
 }
 
+func (r *EtcdAdapter) syncEtcdCluster() {
+	var result bool
+	if r.client != nil {
+		result = r.client.SyncCluster()
+	} else {
+		result = r.client2.SyncCluster()
+	}
+
+	if !result {
+		log.Println("etcd: sync cluster was unsuccessful")
+	}
+}
+
 func (r *EtcdAdapter) Register(service *bridge.Service) error {
+	r.syncEtcdCluster()
+
+
 	var err error
 	if len(r.templates) < 1 {
 		// Default behavior if no templates are registered
@@ -123,6 +141,9 @@ func (r *EtcdAdapter) Register(service *bridge.Service) error {
 }
 
 func (r *EtcdAdapter) Deregister(service *bridge.Service) error {
+	r.syncEtcdCluster()
+
+
 	var err error
 	if len(r.templates) < 1 {
 		// Default behavior if no templates are registered
@@ -158,6 +179,10 @@ func (r *EtcdAdapter) Deregister(service *bridge.Service) error {
 
 func (r *EtcdAdapter) Refresh(service *bridge.Service) error {
 	return r.Register(service)
+}
+
+func (r *EtcdAdapter) Services() ([]*bridge.Service, error) {
+	return []*bridge.Service{}, nil
 }
 
 func (r *EtcdAdapter) executeTemplates(service *bridge.Service) (map[string]string, error) {
