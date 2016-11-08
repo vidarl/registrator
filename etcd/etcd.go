@@ -130,6 +130,8 @@ func (r *EtcdAdapter) Register(service *bridge.Service) error {
 					break
 				}
 			}
+		} else {
+			log.Println("Error processing template :", err)
 		}
 
 	}
