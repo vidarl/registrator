@@ -171,9 +171,11 @@ func (r *EtcdAdapter) Deregister(service *bridge.Service) error {
 				if err != nil {
 					break
 				}
+				dirPath, _ := path.Split(key)
+				dirPath = path.Clean(dirPath)
+				r.garbageCollection(r.path, dirPath)
 			}
 		}
-
 	}
 
 	if err != nil {
