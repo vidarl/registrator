@@ -231,7 +231,7 @@ func (r *EtcdAdapter) garbageCollection(rootDir string, dirPath string) {
 			return
 		}
 
-		dirPath, _ := path.Split(dirPath)
+		dirPath, _ = path.Split(dirPath)
 		dirPath = path.Clean(dirPath)
 	}
 }
