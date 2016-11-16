@@ -19,6 +19,7 @@ ezdev:
 		-e ETCD_TMPL_HOSTNAMES="{{if and .Attrs.lbregister .Attrs.hostnames}}/sites/{{.ID}}/hostnames {{.Attrs.hostnames}}{{end}}" \
 		-e ETCD_TMPL_IP="{{if .Attrs.lbregister}}/sites/{{.ID}}/ip {{.IP}}{{end}}" \
 		-e ETCD_TMPL_PORT="{{if .Attrs.lbregister}}/sites/{{.ID}}/port {{.Port}}{{end}}" \
+		-e ETCD_TMPL_MODIFIED="/modified Modified by registrator"
 		-e GOPATH="/go" \
 		$(NAME):dev /bin/sh -c "cd /go/src/github.com/gliderlabs/registrator; go build -ldflags '-X main.Version=dev' -o /bin/registrator; exec /bin/registrator -ip 127.0.0.1 etcd://etcd:2379/sites"
 
